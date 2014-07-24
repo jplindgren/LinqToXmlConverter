@@ -1,16 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConvert", "XmlConvert\XmlConvert.csproj", "{72FEADDF-2084-4B9A-8098-8F928556867C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConvert.Tests", "XmlConvert.Tests\XmlConvert.Tests.csproj", "{9051A689-10EA-40C2-8C64-AC0E00549A14}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{77250B3F-BEDE-49EE-AA69-D7DF00837511}"
 	ProjectSection(SolutionItems) = preProject
 		Local.testsettings = Local.testsettings
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 		XmlConvert.vsmdi = XmlConvert.vsmdi
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConvert", "src\XmlConvert\XmlConvert.csproj", "{72FEADDF-2084-4B9A-8098-8F928556867C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConvert.Tests", "src\XmlConvert.Tests\XmlConvert.Tests.csproj", "{9051A689-10EA-40C2-8C64-AC0E00549A14}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution

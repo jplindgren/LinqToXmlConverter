@@ -174,3 +174,4 @@ UpgradeLog*.htm
 FakesAssemblies/
 
 Local.testsettings
+buildartifacts/
