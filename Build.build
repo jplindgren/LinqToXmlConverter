@@ -16,17 +16,21 @@
         <SolutionFile Include=".\XmlConvert.sln" />
     </ItemGroup>
 
-    <ItemGroup>
-        <MsTest Include="$(MSBuildProgramFiles32)\Microsoft Visual Studio 10.0\Common7\IDE\MSTest.exe" />
+    <ItemGroup Label="MSTest">
+        <MSTest Include="$(MSBuildProgramFiles32)\Microsoft Visual Studio 10.0\Common7\IDE\MSTest.exe" />
         <TestAssembly Include=".\buildartifacts\XmlConvert.Tests.dll" />
         <TestResults Include=".\buildartifacts\TestResults.xml" />
     </ItemGroup>
 
-    <ItemGroup>
+    <ItemGroup Label="FxCop">
         <FxCop Include=".\tools\FxCop\FxCopCmd.exe" />
         <AssembliesToAnalyze Include=".\buildartifacts\XmlConvert.dll" />
         <ReferencedAssemblies Include=".\buildartifacts\" />
         <AnalysisReport Include=".\buildartifacts\FxCopAnalysisReport.xml" />
+    </ItemGroup>
+
+    <ItemGroup Label="Nuget">
+        <Nuget Include=".\tools\Nuget\Nuget.exe" />
     </ItemGroup>
 
     <Target Name="Clean">
@@ -45,7 +49,7 @@
         <Exec Command=' "@(MSTest)" /testcontainer:"@(TestAssembly)" /resultsfile:"@(TestResults)" '></Exec>
     </Target>
 
-    <Target Name="FxCop" DependsOnTargets="Test">
+    <Target Name="FxCop" DependsOnTargets="Compile">
         <Exec Command=" @(FxCop) /file:@(AssembliesToAnalyze) /directory:@(ReferencedAssemblies) /out:@(AnalysisReport) " IgnoreExitCode="true"></Exec>
         <PropertyGroup>
             <FxCopCriticalErrors>0</FxCopCriticalErrors>
@@ -69,5 +73,25 @@
         </XmlRead>
         <Error Text="FxCop encountered $(Count) material rule violations"
             Condition="$(FxCopCriticalErrors) &gt; 30 or $(FxCopErrors) &gt; 30 or $(FxCopCriticalWarnings) &gt; 30" />
+    </Target>
+
+    <Target Name="Package" DependsOnTargets="FxCop;Test">
+        <!--<Exec Command=' "@(Nuget)" restore "@(SolutionFile)" -OutputDirectory "@(NugetOutputDirectory)"'></Exec>-->
+        <PropertyGroup>
+            <NuspecFile>XmlConvert.nuspec</NuspecFile>
+            <RelativeNuget></RelativeNuget>
+            <ApiKey>1111111-11111--84c0-1111111111</ApiKey>
+        </PropertyGroup>
+        
+        <Exec Command=' "@(Nuget)" update -self' />
+        <!--<Exec Command=' "@(Nuget)" SetApiKey $(ApiKey)' />-->
+        <!--<Exec Command=' "@(Nuget)" spec -a "@(AssembliesToAnalyze)"' />-->
+        <Exec Command=' "../@(Nuget)" spec -a XmlConvert.dll ' WorkingDirectory='./buildartifacts/' />
+        <!--<Exec Command=' "../tools/nuget/nuget.exe" pack $(NuspecFile) -Exclude **\*.xml ' WorkingDirectory='./buildartifacts/' />-->
+        
+        <!-- Gambiarra, retirar -->
+        <Copy SourceFiles='./buildartifacts/$(NuspecFile)' DestinationFolder='./buildartifacts/NugetPackage'/>
+        <Exec Command=' "../../@(Nuget)" pack $(NuspecFile) ' WorkingDirectory='./buildartifacts/NugetPackage' />
+        <Exec Command=' "../../@(Nuget)" push *.nupkg ' WorkingDirectory='./buildartifacts/NugetPackage' />
     </Target>
 </Project>
