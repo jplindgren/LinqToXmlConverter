@@ -40,10 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Formatting.cs" />
     <Compile Include="IgnoreXmlConvert.cs" />
     <Compile Include="IXmlConverter.cs" />
     <Compile Include="IXmlConvertible.cs" />
     <Compile Include="XmlConverter.cs" />
+    <Compile Include="XmlConvertSettings.cs" />
     <Compile Include="XxmlConverterExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

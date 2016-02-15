@@ -7,19 +7,65 @@ using System.Reflection;
 
 namespace XmlConvert {
     public class XmlConverter : IXmlConverter {
+        private XmlConvertSettings settings;
+
+        public XmlConverter(XmlConvertSettings settings) {
+            this.settings = settings ?? XmlConvertSettings.CreateDefault();
+        }
+
         public XDocument Convert(IXmlConvertible entity) {
             XDocument xdoc = new XDocument(CreateXElement(entity));
             return xdoc;
         }
 
-        public XDocument Convert(IList<IXmlConvertible> list) {
-            XDocument xdoc = new XDocument(new XElement("Collection", 
+        public string ConvertAsString(IXmlConvertible entity) {
+            SaveOptions options = settings.Formatting == Formatting.Indented ? SaveOptions.None : SaveOptions.DisableFormatting;
+            XDocument xdoc = Convert(entity);            
+            return xdoc.ToString(options);
+        }
+
+        public XDocument ConvertAndSave(IXmlConvertible entity, string path) {
+            XDocument xdoc = Convert(entity);
+            xdoc.Save(path);
+            return xdoc;
+        }
+
+        public string ConvertAsStringAndSave(IXmlConvertible entity, string path) {
+            SaveOptions options = settings.Formatting == Formatting.Indented ? SaveOptions.DisableFormatting : SaveOptions.None;
+            XDocument xdoc = ConvertAndSave(entity, path);
+            return xdoc.ToString(options);
+        }
+
+
+        public XDocument Convert<T>(IList<T> list) where T : IXmlConvertible {
+            var collectionName = list.GetType().GetGenericArguments().FirstOrDefault(type => IsXmlConvertible(type)).Name;
+            XDocument xdoc = new XDocument(new XElement(string.Format("{0}Collection", collectionName),
                 from _item in list
                 select CreateXElement(_item)
             ));
             return xdoc;
         }
 
+        public string ConvertAsString<T>(IList<T> list) where T : IXmlConvertible {
+            SaveOptions options = settings.Formatting == Formatting.Indented ? SaveOptions.DisableFormatting : SaveOptions.None;
+            XDocument xdoc = Convert(list);
+            return xdoc.ToString(options);
+        }
+
+        public XDocument ConvertAndSave<T>(IList<T> list, string path) where T : IXmlConvertible {
+            XDocument xdoc = Convert<T>(list);
+            xdoc.Save(path);
+            return xdoc;
+        }
+
+        public string ConvertAsStringAndSave<T>(IList<T> list, string path) where T : IXmlConvertible {
+            SaveOptions options = settings.Formatting == Formatting.Indented ? SaveOptions.DisableFormatting : SaveOptions.None;
+            XDocument xdoc = ConvertAndSave<T>(list, path);
+            return xdoc.ToString(options);
+        }
+
+
+        #region private methods
         private XElement CreateXElement(IXmlConvertible entity) {
             var xElement = new XElement(entity.GetType().Name,
                      from property in GetNotIgnoredProperties(entity.GetType())
@@ -27,7 +73,7 @@ namespace XmlConvert {
             return xElement;
         }
 
-        private object CreateElement(PropertyInfo property, IXmlConvertible entity) {            
+        private object CreateElement(PropertyInfo property, IXmlConvertible entity) {
             if (IsXmlConvertible(property) && IsNotNullValue(property, entity)) {
                 // recursive create others elements inside
                 return CreateXElement(property,
@@ -53,7 +99,11 @@ namespace XmlConvert {
         }
 
         private bool IsXmlConvertible(PropertyInfo property) {
-            return property.PropertyType.GetInterfaces().Contains(typeof(IXmlConvertible));
+            return IsXmlConvertible(property.PropertyType);
+        }
+
+        private bool IsXmlConvertible(Type type) {
+            return type.GetInterfaces().Contains(typeof(IXmlConvertible));
         }
 
         private PropertyInfo[] GetNotIgnoredProperties(Type type) {
@@ -69,6 +119,8 @@ namespace XmlConvert {
         //    var value =  property.GetValue(entity, null);
         //    return new XAttribute("Value", value ?? string.Empty);
         //}
+
+        #endregion
 
     }// class
 }

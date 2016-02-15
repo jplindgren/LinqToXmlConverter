@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
@@ -196,7 +197,7 @@ namespace XmlConvert.Tests {
                 }                
             };
             XDocument xDoc = list.ConvertToXml<SampleDataClass>();
-            var expected = string.Format("<Collection>\r\n  " +
+            var expected = string.Format("<SampleDataClassCollection>\r\n  " +
                                          "<SampleDataClass>\r\n    " +
                                          "<Id>1</Id>\r\n    " +
                                          "<Description>foo</Description>\r\n  " +
@@ -205,7 +206,7 @@ namespace XmlConvert.Tests {
                                          "<Id>2</Id>\r\n    " +
                                          "<Description>foo2</Description>\r\n  " +
                                          "</SampleDataClass>\r\n" +
-                                         "</Collection>" );
+                                         "</SampleDataClassCollection>");
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
@@ -213,8 +214,26 @@ namespace XmlConvert.Tests {
         public void Should_Be_Able_To_Convert_Empty_List() {
             IList<SampleDataClass> list = new List<SampleDataClass>();
             XDocument xDoc = list.ConvertToXml<SampleDataClass>();
-            var expected = string.Format("<Collection />");
+            var expected = string.Format("<SampleDataClassCollection />");
             xDoc.ToString().ShouldEqualWithDiff(expected);
+        }
+
+
+        //**************************CONVERT AS STRING **********************************//
+        [TestMethod]
+        public void Should_Be_Able_To_ConvertAsString_Whitout_Indentation() {
+            SampleDataClass data = new SampleDataClass() { Id = 1, Description = "foo" };
+            string result = data.Convert(new XmlConvertSettings() { Formatting = Formatting.None });
+            var expected = "<SampleDataClass><Id>1</Id><Description>foo</Description></SampleDataClass>";
+            result.ShouldEqualWithDiff(expected);
+        }
+
+        [TestMethod]
+        public void Should_Be_Able_To_ConvertAsString_Whith_Indentation() {
+            SampleDataClass data = new SampleDataClass() { Id = 1, Description = "foo" };
+            string result = data.Convert(new XmlConvertSettings() { Formatting = Formatting.Indented });
+            var expected = "<SampleDataClass>\r\n  <Id>1</Id>\r\n  <Description>foo</Description>\r\n</SampleDataClass>";
+            result.ShouldEqualWithDiff(expected);
         }
     } // class
 }
