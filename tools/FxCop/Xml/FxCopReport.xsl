@@ -80,11 +80,8 @@
           if (how != 'none') return false;
           
           //as we're collapsing the tree, set the correct toggle icon
-          var toggle = document.getElementById(block.id + "Toggle");
-          if(toggle != null)
-          {
-          toggle.innerHTML = "&#x0034;";
-          }
+          var toggle = document.getElementById(block.id + "Toggle");                
+          toggle.innerHTML = "&#x0034;";         
           return true;
         }
 

@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using System.Reflection;
+using System.Globalization;
 
+[assembly: CLSCompliant(true)]
 namespace XmlConvert {
     public class XmlConverter : IXmlConverter {
         private XmlConvertSettings settings;
@@ -39,7 +41,7 @@ namespace XmlConvert {
 
         public XDocument Convert<T>(IList<T> list) where T : IXmlConvertible {
             var collectionName = list.GetType().GetGenericArguments().FirstOrDefault(type => IsXmlConvertible(type)).Name;
-            XDocument xdoc = new XDocument(new XElement(string.Format("{0}Collection", collectionName),
+            XDocument xdoc = new XDocument(new XElement(string.Format(CultureInfo.CurrentCulture , "{0}Collection", collectionName),
                 from _item in list
                 select CreateXElement(_item)
             ));
@@ -66,14 +68,14 @@ namespace XmlConvert {
 
 
         #region private methods
-        private XElement CreateXElement(IXmlConvertible entity) {
+        private static XElement CreateXElement(IXmlConvertible entity) {
             var xElement = new XElement(entity.GetType().Name,
                      from property in GetNotIgnoredProperties(entity.GetType())
                      select CreateElement(property, entity));
             return xElement;
         }
 
-        private object CreateElement(PropertyInfo property, IXmlConvertible entity) {
+        private static object CreateElement(PropertyInfo property, IXmlConvertible entity) {
             if (IsXmlConvertible(property) && IsNotNullValue(property, entity)) {
                 // recursive create others elements inside
                 return CreateXElement(property,
@@ -85,33 +87,33 @@ namespace XmlConvert {
             }
         }
 
-        private bool IsNotNullValue(PropertyInfo property, IXmlConvertible entity) {
+        private static bool IsNotNullValue(PropertyInfo property, IXmlConvertible entity) {
             return property.GetValue(entity, null) != null;
         }
 
-        private XElement CreateXElement(PropertyInfo property, object content) {
+        private static XElement CreateXElement(PropertyInfo property, object content) {
             return new XElement(property.Name, content);
         }
 
-        private XElement CreateXElement(PropertyInfo property, IXmlConvertible entity) {
+        private static XElement CreateXElement(PropertyInfo property, IXmlConvertible entity) {
             var value = property.GetValue(entity, null);
             return CreateXElement(property, value ?? string.Empty);
         }
 
-        private bool IsXmlConvertible(PropertyInfo property) {
+        private static bool IsXmlConvertible(PropertyInfo property) {
             return IsXmlConvertible(property.PropertyType);
         }
 
-        private bool IsXmlConvertible(Type type) {
+        private static bool IsXmlConvertible(Type type) {
             return type.GetInterfaces().Contains(typeof(IXmlConvertible));
         }
 
-        private PropertyInfo[] GetNotIgnoredProperties(Type type) {
+        private static PropertyInfo[] GetNotIgnoredProperties(Type type) {
             return type.GetProperties().Where(x => NotIgnored(x)).ToArray();
         }
 
-        private bool NotIgnored(PropertyInfo property) {
-            var attr = property.GetCustomAttributes(typeof(IgnoreXmlConvert), true);
+        private static bool NotIgnored(PropertyInfo property) {
+            var attr = property.GetCustomAttributes(typeof(IgnoreXmlConvertAttribute), true);
             return attr.Length == 0;
         }
 

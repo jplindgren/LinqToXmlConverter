@@ -5,7 +5,5 @@ using System.Text;
 
 namespace XmlConvert {
     [System.AttributeUsage(System.AttributeTargets.Property)]
-    public class IgnoreXmlConvert : System.Attribute{
-
-    }// class
+    public sealed class IgnoreXmlConvertAttribute : System.Attribute{ }
 }
