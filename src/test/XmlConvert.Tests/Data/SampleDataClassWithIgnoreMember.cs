@@ -7,7 +7,7 @@ namespace XmlConvert.Tests.Data {
     public class SampleDataClassWithIgnoreMember : IXmlConvertible{
         public int Id { get; set; }
 
-        [IgnoreXmlConvert]
+        [IgnoreXmlConvertAttribute]
         public string Description { get; set; }
     }// class
 }

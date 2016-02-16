@@ -3,99 +3,60 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Xml.Linq;
 using XmlConvert.Tests.Data;
+using Xunit;
 
 namespace XmlConvert.Tests {
     /// <summary>
     /// Summary description for UnitTest1
     /// </summary>
-    [TestClass]
     public class XmlConvertTest {
-
-        private TestContext testContextInstance;
-
-        /// <summary>
-        ///Gets or sets the test context which provides
-        ///information about and functionality for the current test run.
-        ///</summary>
-        public TestContext TestContext {
-            get {
-                return testContextInstance;
-            }
-            set {
-                testContextInstance = value;
-            }
-        }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
-        public void Convert_to_Xml_Should_Return_An_XDocument_Even_With_Not_Initialized_Values() {
+        [Fact]
+        public void ConvertToXmlShouldReturnAnXDocumentEvenWithNotInitializedValues() {
             SampleDataClass data = new SampleDataClass();
             XDocument xDoc = data.ConvertToXml();
             var expected = "<SampleDataClass>\r\n  <Id>0</Id>\r\n  <Description></Description>\r\n</SampleDataClass>";
 
-            Assert.IsNotNull(xDoc);
-            Assert.AreEqual(expected, xDoc.ToString());
+            Assert.NotNull(xDoc);
+            Assert.Equal(expected, xDoc.ToString());
         }
 
-        [TestMethod]
-        public void Should_Convert_Basic_Properties() {
+        [Fact]
+        public void ShouldConvertBasicProperties() {
             SampleDataClass data = new SampleDataClass() { Id = 1, Description = "foo" };
             XDocument xDoc = data.ConvertToXml();
             var expected = "<SampleDataClass>\r\n  <Id>1</Id>\r\n  <Description>foo</Description>\r\n</SampleDataClass>";
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Not_Convert_Property_With_IgnoreXmlConvert() {
+        [Fact]
+        public void ShouldNotConvertPropertyWithIgnoreXmlConvert() {
             SampleDataClassWithIgnoreMember data = new SampleDataClassWithIgnoreMember() { Id = 1, Description = "foo" };
             XDocument xDoc = data.ConvertToXml();
             var expected = "<SampleDataClassWithIgnoreMember>\r\n  <Id>1</Id>\r\n</SampleDataClassWithIgnoreMember>";
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Work_With_Nullable_Properties() {
+        [Fact]
+        public void ShouldWorkWithNullableProperties() {
             NullableSampleData data = new NullableSampleData() { Id = 1, Description = "foo", Money = 100.05m };
             XDocument xDoc = data.ConvertToXml();
             var expected = "<NullableSampleData>\r\n  <Money>100.05</Money>\r\n  <Id>1</Id>\r\n  <Description>foo</Description>\r\n</NullableSampleData>";
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Work_With_Nullable_Properties_Passing_Null() {
+        [Fact]
+        public void ShouldWorkWithNullablePropertiesPassingNull() {
             NullableSampleData data = new NullableSampleData() { Id = 1, Description = "foo", Money = null };
             XDocument xDoc = data.ConvertToXml();
             var expected = "<NullableSampleData>\r\n  <Money></Money>\r\n  <Id>1</Id>\r\n  <Description>foo</Description>\r\n</NullableSampleData>";
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        [Ignore]
-        public void Should_Work_With_DateTime_Properties() {
+        [Fact(Skip = "Wait to implement a decente date treatment")]
+        //[Fact()]
+        public void ShouldWorkWithDateTimeProperties() {
             var now = DateTime.Now;
             DateTimeSampleData data = new DateTimeSampleData() { Id = 1, Description = "foo", Created = now };
             XDocument xDoc = data.ConvertToXml();
@@ -103,8 +64,8 @@ namespace XmlConvert.Tests {
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Work_With_Complex_Type_Property() {
+        [Fact]
+        public void ShouldWorkWithComplexTypeProperty() {
             ParentSampleData data = new ParentSampleData() {
                 Id = 1,
                 Description = "foo",
@@ -125,8 +86,8 @@ namespace XmlConvert.Tests {
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Not_Convert_Complexy_Type_Property_With_IgnoreXmlConvert() {
+        [Fact]
+        public void ShouldNotConvertComplexyTypePropertyWithIgnoreXmlConvert() {
             ParentSampleDataWithChildIgnored data = new ParentSampleDataWithChildIgnored() { 
                 Id = 1, 
                 Description = "foo",
@@ -146,8 +107,8 @@ namespace XmlConvert.Tests {
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Work_With_Complex_Type_Property_With_Null_Reference() {
+        [Fact]
+        public void ShouldWorkWithComplexTypePropertyWithNullReference() {
             ParentSampleData data = new ParentSampleData() {
                 Id = 1,
                 Description = "foo",
@@ -162,8 +123,8 @@ namespace XmlConvert.Tests {
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Handle_With_Auto_Relation() {
+        [Fact]
+        public void ShouldHandleWithAutoRelation() {
             AutoRelationData data = new AutoRelationData() {
                 Id = 1,
                 Description = "foo",
@@ -184,8 +145,8 @@ namespace XmlConvert.Tests {
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Be_Able_To_Convert_Lists() {
+        [Fact]
+        public void ShouldBeAbleToConvertLists() {
             IList<SampleDataClass> list = new List<SampleDataClass>() {
                 new SampleDataClass(){
                     Id = 1,
@@ -210,8 +171,8 @@ namespace XmlConvert.Tests {
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Be_Able_To_Convert_Empty_List() {
+        [Fact]
+        public void ShouldBeAbleToConvertEmptyList() {
             IList<SampleDataClass> list = new List<SampleDataClass>();
             XDocument xDoc = list.ConvertToXml<SampleDataClass>();
             var expected = string.Format("<SampleDataClassCollection />");
@@ -220,16 +181,16 @@ namespace XmlConvert.Tests {
 
 
         //**************************CONVERT AS STRING **********************************//
-        [TestMethod]
-        public void Should_Be_Able_To_ConvertAsString_Whitout_Indentation() {
+        [Fact]
+        public void ShouldBeAbleToConvertAsStringWhitoutIndentation() {
             SampleDataClass data = new SampleDataClass() { Id = 1, Description = "foo" };
             string result = data.Convert(new XmlConvertSettings() { Formatting = Formatting.None });
             var expected = "<SampleDataClass><Id>1</Id><Description>foo</Description></SampleDataClass>";
             result.ShouldEqualWithDiff(expected);
         }
 
-        [TestMethod]
-        public void Should_Be_Able_To_ConvertAsString_Whith_Indentation() {
+        [Fact]
+        public void ShouldBeAbleToConvertAsStringWhithIndentation() {
             SampleDataClass data = new SampleDataClass() { Id = 1, Description = "foo" };
             string result = data.Convert(new XmlConvertSettings() { Formatting = Formatting.Indented });
             var expected = "<SampleDataClass>\r\n  <Id>1</Id>\r\n  <Description>foo</Description>\r\n</SampleDataClass>";

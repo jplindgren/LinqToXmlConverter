@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{77250B3F-BEDE-49EE-AA69-D7DF00837511}"
 	ProjectSection(SolutionItems) = preProject
 		Build.build = Build.build
@@ -9,9 +9,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		XmlConvert.vsmdi = XmlConvert.vsmdi
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConvert", "src\XmlConvert\XmlConvert.csproj", "{72FEADDF-2084-4B9A-8098-8F928556867C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A638AA18-7165-4F7C-9A1C-8839CDA9F22C}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConvert.Tests", "src\XmlConvert.Tests\XmlConvert.Tests.csproj", "{9051A689-10EA-40C2-8C64-AC0E00549A14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConvert", "src\app\XmlConvert\XmlConvert.csproj", "{72FEADDF-2084-4B9A-8098-8F928556867C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmlConvert.Tests", "src\test\XmlConvert.Tests\XmlConvert.Tests.csproj", "{9051A689-10EA-40C2-8C64-AC0E00549A14}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution

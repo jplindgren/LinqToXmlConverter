@@ -5,7 +5,7 @@ using System.Text;
 
 namespace XmlConvert.Tests.Data {
     public class SampleChildWithIgnoredMember : IXmlConvertible{
-        [IgnoreXmlConvert]
+        [IgnoreXmlConvertAttribute]
         public int Id { get; set; }
         public string Description { get; set; }
     }// class

@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Formatting.cs" />
-    <Compile Include="IgnoreXmlConvert.cs" />
+    <Compile Include="IgnoreXmlConvertAttribute.cs" />
     <Compile Include="IXmlConverter.cs" />
     <Compile Include="IXmlConvertible.cs" />
     <Compile Include="XmlConverter.cs" />
