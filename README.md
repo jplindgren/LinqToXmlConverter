@@ -3,6 +3,6 @@ LinqToXmlXmlConverter
 
 Automagic Xml Converter using LinqToXml
 
-[link to Google!](https://ci.appveyor.com/api/projects/status/github/LinqToXmlConverter/retina=true)
+[![Build status](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?retina=true)](https://ci.appveyor.com/project/jplindgren/LinqToXmlConverter/branch/master)
 
 
