@@ -18,7 +18,7 @@ namespace XmlConvert.Tests {
             XDocument xDoc = data.ConvertToXml();
             var expected = "<SampleDataClass>\r\n  <Id>0</Id>\r\n  <Description></Description>\r\n</SampleDataClass>";
 
-            Assert.NotNull(xDoc);
+            Assert.Null(xDoc);
             Assert.Equal(expected, xDoc.ToString());
         }
 
