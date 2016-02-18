@@ -9,4 +9,4 @@ echo "Installing Fake..."
 echo "Fake Installed!!"
 ls
 "packages\FAKE\tools\Fake.exe" build.fsx
-pause
+rem pause
