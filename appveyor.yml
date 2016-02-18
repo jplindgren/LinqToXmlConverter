@@ -1,0 +1,7 @@
+environment:  
+  version: 0.1.{build}
+assembly_info:  
+  patch: false
+build_script:  
+  build.bat
+test: off 
