@@ -1,5 +1,5 @@
 // include Fake lib
-#r @"packages\FAKE.4.20.0\tools\FakeLib.dll"
+#r @"packages\FAKE\tools\FakeLib.dll"
 open Fake
 open Fake.Testing
 open Fake.AssemblyInfoFile
@@ -81,15 +81,38 @@ Target "Zip" (fun _ ->
 )
 
 
+
+let execOnAppveyor arguments =
+    let result =
+      ExecProcess (fun info ->
+        info.FileName <- "appveyor"
+        info.Arguments <- arguments
+        ) (System.TimeSpan.FromMinutes 2.0)
+    if result <> 0 then failwith (sprintf "Failed to execute appveyor command: %s" arguments)
+    trace "Published packages"
+
+let publishOnAppveyor folder =
+    !! (folder + "*.nupkg")
+    |> Seq.iter (fun artifact -> execOnAppveyor (sprintf "PushArtifact %s" artifact))
+
+Target "Publish" (fun _ ->
+    match buildServer with
+    | BuildServer.AppVeyor ->
+        publishOnAppveyor deployDir
+    | _ -> ()
+)
+
+
 //Dependencies
 "Clean" 
   ==> "BuildApp"
   ==> "FxCop"
   ==> "BuildTest"
   ==> "Test"
-  ==> "Zip"
+  //==> "Publish"
+  //==> "Zip"
   //==> "Watch"
   
 
 // start build
-RunTargetOrDefault "Zip"
+RunTargetOrDefault "Test"
