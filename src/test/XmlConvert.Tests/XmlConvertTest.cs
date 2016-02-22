@@ -54,14 +54,17 @@ namespace XmlConvert.Tests {
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
-        [Fact(Skip = "Wait to implement a decente date treatment")]
-        //[Fact()]
+        [Fact]
         public void ShouldWorkWithDateTimeProperties() {
             var now = DateTime.Now;
             DateTimeSampleData data = new DateTimeSampleData() { Id = 1, Description = "foo", Created = now };
             XDocument xDoc = data.ConvertToXml();
-            var expected = string.Format("<DateTimeSampleData>\r\n  <Created Value=\"{0}\" />\r\n  <Id Value=\"1\" />\r\n  <Description Value=\"foo\" />\r\n</DateTimeSampleData>", now.ToString());
+            var expected = string.Format("<DateTimeSampleData>\r\n  <Created>{0}</Created>\r\n  <Id>1</Id>\r\n  <Description>foo</Description>\r\n</DateTimeSampleData>", GetISO8601Date(now));
             xDoc.ToString().ShouldEqualWithDiff(expected);
+        }
+
+        private string GetISO8601Date(DateTime date) {
+            return date.ToString(@"yyyy-MM-ddTHH\:mm\:ss.fffffffzzz");
         }
 
         [Fact]
@@ -179,6 +182,21 @@ namespace XmlConvert.Tests {
             xDoc.ToString().ShouldEqualWithDiff(expected);
         }
 
+        [Fact]
+        public void ShouldHandleIgnoreNullValuesSetting() {
+            ParentSampleData data = new ParentSampleData() {
+                Id = 1,
+                Description = "foo",
+                SampleChildClass = null
+            };
+
+            XDocument xDoc = data.ConvertToXml(new XmlConvertSettings() { NullValueHandling = NullValueHandling.Ignore });
+            var expected = string.Format("<ParentSampleData>\r\n  " +
+                                         "<Id>1</Id>\r\n  " +
+                                         "<Description>foo</Description>\r\n" +
+                                         "</ParentSampleData>");
+            xDoc.ToString().ShouldEqualWithDiff(expected);
+        }
 
         //**************************CONVERT AS STRING **********************************//
         [Fact]
@@ -196,5 +214,68 @@ namespace XmlConvert.Tests {
             var expected = "<SampleDataClass>\r\n  <Id>1</Id>\r\n  <Description>foo</Description>\r\n</SampleDataClass>";
             result.ShouldEqualWithDiff(expected);
         }
+
+
+
+
+
+
+
+
+
+
+
+        /**** new tests, TODO: Organized it!! *************/
+        //[Fact]
+        //public void MoreComplexType() {
+        //    var riskEvent = new RiskEvent();
+        //    riskEvent.Id = Guid.NewGuid();
+        //    riskEvent.Title = "Event0001";
+        //    riskEvent.Status = EventStatus.Closed;
+        //    riskEvent.CustomAttributes = new Dictionary<string, object>() {
+        //        { "HasInvolveds", true },
+        //        { "NumberOfInvolveds", 3 },
+        //        { "InvolvedNames", new string[] { "Joao Paulo", "Aline", "Rafael" } }
+        //    };
+        //    riskEvent.CreatedAt = DateTime.Now;
+        //    riskEvent.USR = 125;
+        //    riskEvent.Coordinator = new Coordinator() {
+        //        Id = Guid.NewGuid(),
+        //        Name = "Administrator"
+        //    };
+        //    riskEvent.Vulnerabilities = new string[] { "Vulnerability1", "Vulnerability2" };
+        //    riskEvent.Requirements = new List<string> { "Requirement1", "Requirement2" };
+        //    riskEvent.HasContinuityPlan = false;
+
+
+        //}
+
+        //public class Event : IXmlConvertible {
+        //    public Guid Id { get; set; }
+        //    public string Title { get; set; }
+        //    public EventStatus Status { get; set; }
+        //    public IDictionary<string, object> CustomAttributes { get; set; }
+        //    public DateTime CreatedAt { get; set; }
+        //    public int USR { get; set; }
+        //    public Coordinator Coordinator { get; set; }
+        //}
+
+        //public class RiskEvent : Event {
+        //    public string[] Vulnerabilities { get; set; }
+        //    public IList<string> Requirements { get; set; }
+        //    public bool HasContinuityPlan { get; set; }
+        //}
+
+        //public enum EventStatus {
+        //    Open = 1,
+        //    Closed = 2,
+        //    Cancelled = 3,
+        //    Deleted = 4
+        //}
+
+        //public class Coordinator {
+        //    public Guid Id { get; set; }
+        //    public string Name { get; set; }
+        //}
     } // class
 }

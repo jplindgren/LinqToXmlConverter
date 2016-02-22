@@ -5,6 +5,8 @@ using System.Text;
 using System.Xml.Linq;
 using System.Reflection;
 using System.Globalization;
+using System.Linq.Expressions;
+using XmlConvert.Specifications;
 
 [assembly: CLSCompliant(true)]
 namespace XmlConvert {
@@ -16,7 +18,7 @@ namespace XmlConvert {
         }
 
         public XDocument Convert(IXmlConvertible entity) {
-            XDocument xdoc = new XDocument(CreateXElement(entity));
+            XDocument xdoc = new XDocument(CreateNodeXElement(entity.GetType().Name, entity));
             return xdoc;
         }
 
@@ -43,7 +45,7 @@ namespace XmlConvert {
             var collectionName = list.GetType().GetGenericArguments().FirstOrDefault(type => IsXmlConvertible(type)).Name;
             XDocument xdoc = new XDocument(new XElement(string.Format(CultureInfo.CurrentCulture , "{0}Collection", collectionName),
                 from _item in list
-                select CreateXElement(_item)
+                select CreateNodeXElement(_item.GetType().Name, _item)
             ));
             return xdoc;
         }
@@ -68,53 +70,59 @@ namespace XmlConvert {
 
 
         #region private methods
-        private static XElement CreateXElement(IXmlConvertible entity) {
-            var xElement = new XElement(entity.GetType().Name,
-                     from property in GetNotIgnoredProperties(entity.GetType())
-                     select CreateElement(property, entity));
+        private XElement CreateNodeXElement(string nodeName, IXmlConvertible entity) {
+            var properties = GetElementProperties(entity.GetType());
+
+            var elementList = properties.Select(property => CreateWrapper(entity, property));
+
+            //TODO: Find a more elegant way to apply specifictions based on settings
+            if (settings.NullValueHandling == NullValueHandling.Ignore)
+                elementList = elementList.Where(new NotNullSpecification().IsSatisfiedBy());
+
+            IQueryable<object> innerElements = elementList.Select(property => CreateElement(property, entity));            
+
+            var xElement = new XElement(nodeName, innerElements);
+                     
             return xElement;
         }
 
-        private static object CreateElement(PropertyInfo property, IXmlConvertible entity) {
-            if (IsXmlConvertible(property) && IsNotNullValue(property, entity)) {
-                // recursive create others elements inside
-                return CreateXElement(property,
-                    from innerProperty in GetNotIgnoredProperties(property.PropertyType)
-                    select CreateElement(innerProperty, (IXmlConvertible)property.GetValue(entity, null)));
-            } else {
-                //Create element with value
-                return CreateXElement(property, entity);
-            }
+        private XmlElementWrapper CreateWrapper(IXmlConvertible entity, PropertyInfo propertyInfo) {
+            return new XmlElementWrapper() {
+                PropertyInfo = propertyInfo,
+                Value = propertyInfo.GetValue(entity, null),
+                Name = propertyInfo.Name
+            };
         }
 
-        private static bool IsNotNullValue(PropertyInfo property, IXmlConvertible entity) {
-            return property.GetValue(entity, null) != null;
-        }
-
-        private static XElement CreateXElement(PropertyInfo property, object content) {
-            return new XElement(property.Name, content);
-        }
-
-        private static XElement CreateXElement(PropertyInfo property, IXmlConvertible entity) {
-            var value = property.GetValue(entity, null);
-            return CreateXElement(property, value ?? string.Empty);
-        }
-
-        private static bool IsXmlConvertible(PropertyInfo property) {
-            return IsXmlConvertible(property.PropertyType);
-        }
-
-        private static bool IsXmlConvertible(Type type) {
+        public bool IsXmlConvertible(Type type) {
             return type.GetInterfaces().Contains(typeof(IXmlConvertible));
         }
 
-        private static PropertyInfo[] GetNotIgnoredProperties(Type type) {
-            return type.GetProperties().Where(x => NotIgnored(x)).ToArray();
+        private IQueryable<PropertyInfo> GetElementProperties(Type type) {
+            var specificationsList = new ISpecification<PropertyInfo>[] { 
+                new PropertyNotIgnoredSpecification()
+            };
+            
+            var properties = type.GetProperties().AsQueryable();
+            return ApplySpecification(properties, new AndCompositeSpecification<PropertyInfo>(specificationsList));
         }
 
-        private static bool NotIgnored(PropertyInfo property) {
-            var attr = property.GetCustomAttributes(typeof(IgnoreXmlConvertAttribute), true);
-            return attr.Length == 0;
+        private object CreateElement(XmlElementWrapper element, IXmlConvertible entity) {
+            if (element.IsXmlConvertible() && element.IsNotNullValue()) {
+                // recursive create others elements inside
+                return CreateNodeXElement(element.Name, (IXmlConvertible)element.Value);
+            } else {
+                //Create element with value
+                return CreateLeafXElement(element);
+            }
+        }
+
+        private static XElement CreateLeafXElement(XmlElementWrapper element) {
+            return new XElement(element.Name, element.Value ?? string.Empty);
+        }
+
+        private IQueryable<PropertyInfo> ApplySpecification(IQueryable<PropertyInfo> properties, ISpecification<PropertyInfo> specification) {
+            return properties.Where(specification.IsSatisfiedBy());
         }
 
         //public XAttribute CreateXAttributeFromProperty(PropertyInfo property, IXmlConvertible entity){
